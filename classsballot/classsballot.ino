@@ -164,9 +164,9 @@ class Ballot {
   void poll(){
     // Vote for president
     lcd.print(ballot_name);
-    delay(500);
+    delay(1000);
     lcd.clear();
-    char key;
+    char key = NO_KEY ;
     char Vote[num_pref];
     String Name[num_pref];
     int count=0;
@@ -174,23 +174,26 @@ class Ballot {
     while(count<num_pref){
       initial_prompt();
       lcd.setCursor(0,1);
-      String tempdisp = String("Preference") + String(" ") + String(count+1) ;
+      String tempdisp = String("Preference") + String(" ") + String(count+1);
       lcd.print(tempdisp);
       while( key == NO_KEY ){
         key = customKeypad.getKey();
       }
       if (key){
-        if(key=="*"){
+        if(String(key)=="*"){
           cancel=1;
           lcd.clear();
           lcd.print("Cancelled");
           delay(1000);
           lcd.clear();      
-          break;         
+          count = 0;
+          key = NO_KEY;
+          continue;         
         }
         Candidate y = this->getCand(String(key));
         if (y.getName()=="Invalid"){
           invalid_prompt();
+          key = NO_KEY;
         }
         else{   
           lcd.setCursor(0,2);
@@ -200,8 +203,10 @@ class Ballot {
           lcd.clear();
           Vote[count]=key;
           Name[count]=y.getName();
+          key = NO_KEY;
           count++;
         }
+        
       }
     }
     if (cancel==0){
@@ -209,7 +214,7 @@ class Ballot {
       for (int i=0;i<num_pref;i++){
         lcd.print("You have chosen:");  
         lcd.setCursor(0,1);
-        lcd.print('i+1');
+        lcd.print(i+1);
         lcd.setCursor(2,1);
         lcd.print(Name[i]);
         delay(1000);
@@ -284,6 +289,7 @@ class Election{
 };
 
 void setup() {
+//  Serial.begin(9600);  
   lcd.begin(16,4);
   // put your setup code here, to run once:
   word num_pref=2;
@@ -294,10 +300,10 @@ void setup() {
   Ballot ballot1 = Ballot(2,"President",2,prefs,list);
   ballot1.poll();
 
-  Serial.begin(9600);  
-  Serial.println(obj1.getVotes(0));
-  Serial.println(obj1.getVotes(1));
-  Serial.println(obj1.getVotes(2));
+  
+//  Serial.println(obj1.getVotes(0));
+//  Serial.println(obj1.getVotes(1));
+//  Serial.println(obj1.getVotes(2));
 
 }
 
