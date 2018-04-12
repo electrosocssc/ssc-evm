@@ -123,11 +123,16 @@ class Ballot {
     *pref_weight= 1;
   }
 
-  Ballot(word NP,String name1, word NC, word* PW , Candidate* candt){
-    ballot_name=name1;
+  Ballot(word NP,String b_name, word NC, word* PW , Candidate* candt){
+    ballot_name=b_name;
     num_pref=  NP;
+    if (num_pref == 1){
+      *(pref_weight)=1;
+    }
+    else{
+      pref_weight= PW;  
+    }
     num_candidates= NC;
-    pref_weight= PW;
     candidates= candt; 
   }
 
@@ -156,7 +161,7 @@ class Ballot {
     return num_candidates;
   }
 
-  void Poll(){
+  void poll(){
     // Vote for president
     lcd.print(ballot_name);
     delay(500);
@@ -273,27 +278,27 @@ class Election{
   }
   void conduct(){
     for (int i=0; i<num_ballots;i++){
-      (ballots+i)->Poll();
+      (ballots+i)->poll();
     }
   }
 };
 
 void setup() {
+  lcd.begin(16,4);
   // put your setup code here, to run once:
   word num_pref=2;
-  String candCode="0";
-  String candName="abc";
-  Candidate obj1 = Candidate(candCode,candName,num_pref);
-  obj1.vote(0);
-  obj1.vote(1); 
-  obj1.vote(1); 
-  obj1.vote(1); 
-  obj1.vote(2);
-  obj1.vote(2);
+  Candidate obj1 = Candidate("A","Priyanka",num_pref);
+  Candidate obj2 = Candidate("B","Anuj",num_pref);
+  Candidate list[2] = {obj1,obj2};
+  int prefs[2] = {2,1};
+  Ballot ballot1 = Ballot(2,"President",2,prefs,list);
+  ballot1.poll();
+
   Serial.begin(9600);  
   Serial.println(obj1.getVotes(0));
   Serial.println(obj1.getVotes(1));
   Serial.println(obj1.getVotes(2));
+
 }
 
 void loop() {
