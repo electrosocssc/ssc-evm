@@ -83,7 +83,11 @@ class Candidate{
     }
   }
   void vote(word pref_num){
-    *(votes+pref_num) += 1; 
+    if(pref_num >= 0 && pref_num < num_prefs){ 
+      *(votes+pref_num) += 1; 
+    }  
+    else
+      return;
   }
   char getCode(){
     return code;
@@ -92,7 +96,11 @@ class Candidate{
     return Name;
   }
   int getVotes(word pref_num){
-    return *(votes+pref_num);
+    if(pref_num >= 0 && pref_num < num_prefs){ 
+      return *(votes+pref_num);
+    }
+    else
+      return -1;  
   }   
 }; 
  
@@ -240,46 +248,59 @@ class Ballot {
   }
 };
 
-class Election{
-  private:
-  Ballot* ballots;
-  word num_ballots;
-
-public:
-  
-  Election(){
-    Ballot B = Ballot();
-    ballots = &B;
-    num_ballots=1;
-  }
-
-  Election(Ballot* ballot1, word N_B){
-    ballots= &ballot1;
-    num_ballots=N_B;
-  }
-    
-  Ballot getBallot(String A ){
-    Ballot y=*(ballots);
-    for (int i=0;i<num_ballots;i++){
-      if(y.getBallotName()==A;){
-        return y;
-      }
-      y++;
-    }
-  
-  }
-  void conduct(){
-    Ballot tempballot= *(ballots);
-    for (int i=0; i<num_ballots;i++){
-      tempballot.Poll();
-      tempballot++;
-    }
-  }
-};
+//class Election{
+//  private:
+//  Ballot* ballots;
+//  word num_ballots;
+//
+//public:
+//  
+//  Election(){
+//    Ballot B = Ballot();
+//    ballots = &B;
+//    num_ballots=1;
+//  }
+//
+//  Election(Ballot* ballot1, word N_B){
+//    ballots= &ballot1;
+//    num_ballots=N_B;
+//  }
+//    
+//  Ballot getBallot(String A ){
+//    Ballot y=*(ballots);
+//    for (int i=0;i<num_ballots;i++){
+//      if(y.getBallotName()==A;){
+//        return y;
+//      }
+//      y++;
+//    }
+//  
+//  }
+//  void conduct(){
+//    Ballot tempballot= *(ballots);
+//    for (int i=0; i<num_ballots;i++){
+//      tempballot.Poll();
+//      tempballot++;
+//    }
+//  }
+//};
 
 void setup() {
   // put your setup code here, to run once:
-
+  word num_pref=2;
+  word candCode=0;
+  String candName="abc";
+  Candidate obj1 = Candidate(candCode,candName,num_pref);
+  obj1.vote(0);
+  obj1.vote(1); 
+  obj1.vote(1); 
+  obj1.vote(1); 
+  obj1.vote(2);
+  obj1.vote(2);
+  Serial.begin(9600);  
+  Serial.println(obj1.getVotes(0));
+  Serial.println(obj1.getVotes(1));
+  Serial.println(obj1.getVotes(2));
 }
 
 void loop() {
