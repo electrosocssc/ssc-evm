@@ -57,24 +57,24 @@ void invalid_prompt(){
 
 class Candidate{
   private:
-  char code;
+  String code;
   String Name;
   word* votes;
   word num_prefs;
   
   public:
   Candidate(){ 
-    code=0;
+    code="0";
     Name=" ";
     *votes = 0;
   }
-  Candidate( char candCode, String candName){
+  Candidate( String candCode, String candName){
     code = candCode;
     Name = candName;
     num_prefs = 0;
     *votes = 0;
   }
-  Candidate(char candCode, String candName, word num_pref){
+  Candidate(String candCode, String candName, word num_pref){
     code = candCode;
     Name = candName;
     num_prefs = num_pref;
@@ -89,7 +89,7 @@ class Candidate{
     else
       return;
   }
-  char getCode(){
+  String getCode(){
     return code;
   }
   String getName(){
@@ -111,17 +111,16 @@ class Ballot {
   word num_candidates;
   word num_pref;
   word* pref_weight;
-  word prefDefault[num_pref];
+  
 
   public:
   Ballot(){
-    Candidate cand = Candidates();
+    Candidate cand = Candidate();
     candidates = &cand;
     num_candidates=1;
     num_pref=1;
     ballot_name="Prezzzzz";
-    prefDefault=1;
-    pref_weight= &prefDefault;
+    *pref_weight= 1;
   }
 
   Ballot(word NP,String name1, word NC, word* PW , Candidate* candt){
@@ -138,20 +137,19 @@ class Ballot {
     
   Candidate getCand(String A){
     for (int i=0;i<num_candidates;i++){
-      y*(candidates +i);
+      Candidate y = *(candidates +i);
       if (y.getCode()==A){
         return y;
       }
     }
-    p=Candidate(/0,"Invalid");
-    return p;
+    return Candidate("-1","Invalid");
   }
   
   int getPref(){
     return num_pref;
   }
-  word int* getWeight(){
-    return *pref_weight
+  word* getWeight(){
+    return *pref_weight;
   }
   
   int getNum_Cand(){
@@ -163,6 +161,7 @@ class Ballot {
     lcd.print(ballot_name);
     delay(500);
     lcd.clear();
+    char key;
     char Vote[num_pref];
     String Name[num_pref];
     int count=0;
@@ -170,7 +169,7 @@ class Ballot {
     while(count<num_pref){
       initial_prompt();
       lcd.setCursor(0,1);
-      String tempdisp = "Preference"+ " " + 'count+1' ;
+      String tempdisp = String("Preference") + String(" ") + String(count+1) ;
       lcd.print(tempdisp);
       while( key == NO_KEY ){
         key = customKeypad.getKey();
@@ -179,23 +178,23 @@ class Ballot {
         if(key=="*"){
           cancel=1;
           lcd.clear();
-          lcd.print("Cancelled")
+          lcd.print("Cancelled");
           delay(1000);
-          lcd.clear()      
+          lcd.clear();      
           break;         
         }
-        Candidate y= *this.getCand(key);
+        Candidate y = this->getCand(String(key));
         if (y.getName()=="Invalid"){
           invalid_prompt();
         }
         else{   
           lcd.setCursor(0,2);
-          String tempname=key+" "+y.getName ;
+          String tempname = String(key) + String(" ") + String(y.getName()) ;
           lcd.print(tempname);
           delay(500);
           lcd.clear();
           Vote[count]=key;
-          Name[count]=y.getName;
+          Name[count]=y.getName();
           count++;
         }
       }
@@ -207,7 +206,7 @@ class Ballot {
         lcd.setCursor(0,1);
         lcd.print('i+1');
         lcd.setCursor(2,1);
-        lcd.print(Name(i));
+        lcd.print(Name[i]);
         delay(1000);
         lcd.clear();
       }
@@ -227,7 +226,7 @@ class Ballot {
         if (key=="*"){
           cancel=1;
           lcd.clear();
-          lcd.print("Cancelled")
+          lcd.print("Cancelled");
           delay(1000);
           lcd.clear(); 
         }
@@ -237,10 +236,10 @@ class Ballot {
     if (cancel==0){
       for (int i=0;i<num_pref;i++){
         for (int p=0;p<num_candidates;p++){
-          Candidate C= *(candidate+p);
-          if (vote[i]==C.getCode()){
-            word A=*(prefweight +i);
-            C.Vote(i,A);
+          Candidate C= *(candidates+p);
+          if (String(Vote[i])==C.getCode()){
+            word A=*(pref_weight +i); // To be removed
+            C.vote(i);
           }
         }
       }
@@ -248,47 +247,41 @@ class Ballot {
   }
 };
 
-//class Election{
-//  private:
-//  Ballot* ballots;
-//  word num_ballots;
-//
-//public:
-//  
-//  Election(){
-//    Ballot B = Ballot();
-//    ballots = &B;
-//    num_ballots=1;
-//  }
-//
-//  Election(Ballot* ballot1, word N_B){
-//    ballots= &ballot1;
-//    num_ballots=N_B;
-//  }
-//    
-//  Ballot getBallot(String A ){
-//    Ballot y=*(ballots);
-//    for (int i=0;i<num_ballots;i++){
-//      if(y.getBallotName()==A;){
-//        return y;
-//      }
-//      y++;
-//    }
-//  
-//  }
-//  void conduct(){
-//    Ballot tempballot= *(ballots);
-//    for (int i=0; i<num_ballots;i++){
-//      tempballot.Poll();
-//      tempballot++;
-//    }
-//  }
-//};
+class Election{
+  private:
+  Ballot* ballots;
+  word num_ballots;
+
+  public:
+  Election(){
+    Ballot B = Ballot();
+    ballots = &B;
+    num_ballots=1;
+  }
+
+  Election(Ballot* ballot1, word N_B){
+    ballots = ballot1;
+    num_ballots=N_B;
+  }
+    
+  Ballot getBallot(String A ){
+    for (int i=0;i<num_ballots;i++){
+      if((ballots+i)->getBallotName()==A){
+        return *(ballots+i);
+      }
+    }
+  }
+  void conduct(){
+    for (int i=0; i<num_ballots;i++){
+      (ballots+i)->Poll();
+    }
+  }
+};
 
 void setup() {
   // put your setup code here, to run once:
   word num_pref=2;
-  word candCode=0;
+  String candCode="0";
   String candName="abc";
   Candidate obj1 = Candidate(candCode,candName,num_pref);
   obj1.vote(0);
