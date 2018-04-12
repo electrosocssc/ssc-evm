@@ -169,47 +169,46 @@ class Ballot {
     char key = NO_KEY ;
     char Vote[num_pref];
     String Name[num_pref];
-    int count=0;
-    int cancel=0;
-    while(count<num_pref){
-      initial_prompt();
-      lcd.setCursor(0,1);
-      String tempdisp = String("Preference") + String(" ") + String(count+1);
-      lcd.print(tempdisp);
-      while( key == NO_KEY ){
-        key = customKeypad.getKey();
+    while(1){
+      int count=0;
+      int confirm=0;
+      while(count<num_pref){
+        initial_prompt();
+        lcd.setCursor(0,1);
+        String tempdisp = String("Preference") + String(" ") + String(count+1);
+        lcd.print(tempdisp);
+        while( key == NO_KEY ){
+          key = customKeypad.getKey();
+        }
+        if (key){
+          if(String(key)=="*"){
+            lcd.clear();
+            lcd.print("Cancelled");
+            delay(1000);
+            lcd.clear();      
+            count = 0;
+            key = NO_KEY;
+            continue;         
+          }
+          Candidate y = this->getCand(String(key));
+          if (y.getName()=="Invalid"){
+            invalid_prompt();
+            key = NO_KEY;
+          }
+          else{   
+            lcd.setCursor(0,2);
+            String tempname = String(key) + String(" ") + String(y.getName()) ;
+            lcd.print(tempname);
+            delay(500);
+            lcd.clear();
+            Vote[count]=key;
+            Name[count]=y.getName();
+            key = NO_KEY;
+            count++;
+          }
+          
+        }
       }
-      if (key){
-        if(String(key)=="*"){
-          cancel=1;
-          lcd.clear();
-          lcd.print("Cancelled");
-          delay(1000);
-          lcd.clear();      
-          count = 0;
-          key = NO_KEY;
-          continue;         
-        }
-        Candidate y = this->getCand(String(key));
-        if (y.getName()=="Invalid"){
-          invalid_prompt();
-          key = NO_KEY;
-        }
-        else{   
-          lcd.setCursor(0,2);
-          String tempname = String(key) + String(" ") + String(y.getName()) ;
-          lcd.print(tempname);
-          delay(500);
-          lcd.clear();
-          Vote[count]=key;
-          Name[count]=y.getName();
-          key = NO_KEY;
-          count++;
-        }
-        
-      }
-    }
-    if (cancel==0){
       lcd.clear();
       for (int i=0;i<num_pref;i++){
         lcd.print("You have chosen:");  
@@ -227,30 +226,29 @@ class Ballot {
           key = customKeypad.getKey();
       }
       if (key){
-        if (key=="#"){
+        if (String(key)=="#"){
           lcd.clear();
-          lcd.print("Thankyou");
+          lcd.print("Thank You");
           delay(500);
           lcd.clear();
+          break;
         }
-        if (key=="*"){
-          cancel=1;
+        if (String(key)=="*"){
           lcd.clear();
           lcd.print("Cancelled");
           delay(1000);
           lcd.clear(); 
+          continue;
         }
       }
     }
     
-    if (cancel==0){
-      for (int i=0;i<num_pref;i++){
-        for (int p=0;p<num_candidates;p++){
-          Candidate C= *(candidates+p);
-          if (String(Vote[i])==C.getCode()){
-            word A=*(pref_weight +i); // To be removed
-            C.vote(i);
-          }
+    // Voting
+    for (int i=0;i<num_pref;i++){
+      for (int p=0;p<num_candidates;p++){
+        if (String(Vote[i])==(candidates+p)->getCode()){
+          word A=*(pref_weight +i); // To be removed
+          (candidates+p)->vote(i);
         }
       }
     }
@@ -289,19 +287,20 @@ class Election{
 };
 
 void setup() {
-//  Serial.begin(9600);  
+  Serial.begin(9600);  
   lcd.begin(16,4);
   // put your setup code here, to run once:
   word num_pref=2;
   Candidate obj1 = Candidate("A","Priyanka",num_pref);
-  Candidate obj2 = Candidate("B","Anuj",num_pref);
+  Candidate obj2 = Candidate("B","Anuj");
   Candidate list[2] = {obj1,obj2};
-  int prefs[2] = {2,1};
+  word prefs[2] = {2,1};
   Ballot ballot1 = Ballot(2,"President",2,prefs,list);
-  ballot1.poll();
+//  ballot1.poll();
 
-  
-//  Serial.println(obj1.getVotes(0));
+  Serial.print(sizeof(obj1));
+  Serial.print(sizeof(obj2));
+//  Serial.print(obj1.getVotes(0));
 //  Serial.println(obj1.getVotes(1));
 //  Serial.println(obj1.getVotes(2));
 
